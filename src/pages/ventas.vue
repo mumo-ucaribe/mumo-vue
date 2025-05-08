@@ -1,39 +1,43 @@
 <template>
-  <v-app>
-    <!-- Header a todo ancho -->
-    <AppHeader page="ventas" />
+  <!-- Header a todo ancho -->
+  <AppHeader page="ventas" />
 
-    <v-main>
-      <v-container fluid class="pa-4">
-        <!-- DataTable reutilizable -->
-        <DataTable
-          :data="ventas"
-          :config="configVentas"
-          :page-rows="10"
-          @buttonClick="onTableButton"
-        />
-      </v-container>
-      <!-- BOTONES DE ACCIÓN -->
-      <v-row class="mt-6" align="center" justify="space-between">
-        <!-- Home -->
-        <v-btn
-          icon
-          large
-          class="ma-2"
-          color="light-green lighten-3"
-          to="/inicio"
-        >
-          <v-icon color="green darken-2">mdi-home</v-icon>
-        </v-btn>
-      </v-row>
-    </v-main>
-  </v-app>
+  <v-container fluid class="pa-4">
+    <!-- DataTable reutilizable -->
+    <DataTable
+      :data="ventas"
+      :config="configVentas"
+      :page-rows="10"
+      @buttonClick="onTableButton"
+    />
+  </v-container>
+
+  <!-- BOTONES DE ACCIÓN -->
+  <v-row class="mt-6 ml-5">
+    <v-btn icon rounded="lg" elevation="2" class="ma-2" color="light-green lighten-3" to="/inicio">
+      <v-icon color="green darken-2">mdi-home</v-icon>
+    </v-btn>
+  </v-row>
+
+  <!-- MODAL PARA FORMULARIO -->
+  <Modal
+    v-model="ventasModal"
+    title="Editar ventas"
+    :isEdit="isEdit"
+    :fullscreen="true"
+    :showFooter="true"
+  >
+    <VentasForm />
+  </Modal>
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { ref, reactive } from "vue";
 
-const ventas = [
+const ventasModal = ref(false);
+const isEdit = ref(null);
+
+const ventas = ref([
   {
     cliente: "Nombre Apellido",
     contacto: "nombre@gmail.com",
@@ -52,14 +56,12 @@ const ventas = [
     estado: "Estado",
     precio: "$01000",
   },
-  // …más filas…
-];
+]);
 
 const configVentas = reactive({
   rawText: "Ventas",
   mainColor: "light-green darken-1",
 
-  // Columnas de la tabla
   fields: [
     { text: "Cliente", value: "cliente", canBeFiltered: true },
     { text: "Contacto", value: "contacto", canBeFiltered: true },
@@ -70,15 +72,11 @@ const configVentas = reactive({
     { text: "Precio", value: "precio" },
   ],
 
-  // Cómo ordenar por defecto
   orderByCol: { Field: ["fecha"] },
-
-  // Selección de filas
   selectConfig: { idRowData: "id" },
-  selectableRow: false, // no selección múltiple
-  disablePagination: false, // paginar
+  selectableRow: false,
+  disablePagination: false,
 
-  // Botones "pegajosos" arriba de la tabla
   buttons: [
     {
       buttonId: "newSale",
@@ -96,15 +94,21 @@ const configVentas = reactive({
   ],
 });
 
-// Captura de eventos desde los botones
 function onTableButton(buttonId, payload) {
   if (buttonId === "newSale") {
-    // lógica para nueva venta
+    isEdit.value = null;
+    ventasModal.value = true;
     console.log("Crear venta");
   }
   if (buttonId === "editSale") {
-    // payload será el ID de la venta seleccionada
-    console.log("Editar/Eliminar venta", payload);
+    const selected = ventas.value.find((vnt) => vnt.id === payload);
+    if (selected) {
+      isEdit.value = selected;
+      ventasModal.value = true;
+      console.log("Editar/Eliminar venta", payload);
+    } else {
+      console.warn("Venta no encontrada con ID:", payload);
+    }
   }
 }
 </script>

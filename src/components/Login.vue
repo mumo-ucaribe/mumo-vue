@@ -66,7 +66,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import AppHeader from './AppHeader.vue'
+// import AppHeader from './AppHeader.vue'
 
 const visible = ref(false)
 </script>

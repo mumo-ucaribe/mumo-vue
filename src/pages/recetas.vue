@@ -61,8 +61,8 @@
 
 <script setup>
 import { reactive } from "vue";
-import AppHeader from "@/components/AppHeader.vue";
-import DataTable from "@/components/DataTable.vue";
+// import AppHeader from "@/components/AppHeader.vue";
+// import DataTable from "@/components/dataTable/DataTable.vue";
 
 const recetas = [
   {

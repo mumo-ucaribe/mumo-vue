@@ -67,7 +67,7 @@
   </template>
   
   <script setup>
-  import AppHeader from '@/components/AppHeader.vue';
+  // import AppHeader from '@/components/AppHeader.vue';
   
   const pedidosHeaders = [
     { text: 'Nombre pedido',       value: 'nombre' },

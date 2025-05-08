@@ -10,10 +10,15 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
-    DataTable: typeof import('./src/components/DataTable.vue')['default']
+    ColumnHeaderWithFilter: typeof import('./src/components/dataTable/ColumnHeaderWithFilter.vue')['default']
+    DataTable: typeof import('./src/components/dataTable/DataTable.vue')['default']
     HelloWorld: typeof import('./src/components/Login.vue')['default']
+    InsumoForm: typeof import('./src/components/pagesForms/insumoForm.vue')['default']
+    InventarioForm: typeof import('./src/components/pagesForms/inventarioForm.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
+    Modal: typeof import('./src/components/Modal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    VentasForm: typeof import('./src/components/pagesForms/ventasForm.vue')['default']
   }
 }

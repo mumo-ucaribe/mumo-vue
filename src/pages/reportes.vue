@@ -65,7 +65,6 @@ const recetas = [
     costoPub: "$0.00",
     ingredientes: null, // valor que se pasará al evento
   },
-  // … más filas …
 ];
 
 const configRecetas = reactive({
