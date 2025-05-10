@@ -1,7 +1,9 @@
 <template>
-  <Login />
+  <VApp>
+    <VLayout>
+      <VMain>
+        <LoginForm />
+      </VMain>
+    </VLayout>
+  </VApp>
 </template>
-
-<script setup>
-  //
-</script>

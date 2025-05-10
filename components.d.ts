@@ -15,7 +15,7 @@ declare module 'vue' {
     InsumoForm: typeof import('./src/components/InsumoForm.vue')['default']
     InventarioForm: typeof import('./src/components/pagesForms/inventarioForm.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
-    LoginForm: typeof import('./src/components/LoginForm.vue')['default']
+    LoginForm: typeof import('./src/components/pagesForms/LoginForm.vue')['default']
     Modal: typeof import('./src/components/Modal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
