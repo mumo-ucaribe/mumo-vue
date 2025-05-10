@@ -1,17 +1,19 @@
-import { registerPlugins } from "@/plugins";
+import { createApp } from 'vue'
+import App from './App.vue'
 
-// Components
-import App from "./App.vue";
-import VueSweetalert2 from "vue-sweetalert2";
-import "sweetalert2/dist/sweetalert2.min.css";
-// Composables
-import { createApp } from "vue";
+// 🧠 Importa el router automático
+import { createRouter, createWebHistory } from 'vue-router/auto'
+import { routes } from 'vue-router/auto-routes'
+import { setupLayouts } from 'virtual:generated-layouts'
 
-// Styles
-import "unfonts.css";
+// 🧩 Crea el router con las rutas y layouts autogenerados
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: setupLayouts(routes),
+})
 
-const app = createApp(App);
+// 🚀 Monta la app con router
+const app = createApp(App)
 
-registerPlugins(app);
-app.use(VueSweetalert2);
-app.mount("#app");
+app.use(router)
+app.mount('#app')
