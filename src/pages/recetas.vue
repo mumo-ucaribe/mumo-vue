@@ -1,7 +1,11 @@
 <template>
   <v-app>
-    <!-- HEADER -->
-    <AppHeader page="recetas" />
+    <!-- HEADER CON VALIDACIÓN -->
+    <AppHeader
+      page="recetas"
+      :tieneCambios="hayCambios"
+      :guardarCambios="guardarCambios"
+    />
 
     <v-main>
       <v-container fluid class="pa-4">
@@ -21,7 +25,7 @@
         <!-- BOTONES INFERIORES -->
         <v-row class="mt-6" align="center" justify="space-between">
           <!-- Home -->
-          <v-btn icon to="/inicio" color="light-green lighten-3">
+          <v-btn icon color="light-green lighten-3" @click="irAInicio">
             <v-icon color="green darken-2">mdi-home</v-icon>
           </v-btn>
 
@@ -49,7 +53,7 @@
             </v-btn>
           </div>
 
-          <!-- Volver a reportes/inventario -->
+          <!-- Volver a reportes -->
           <v-btn icon to="/reportes" color="light-green lighten-3">
             <v-icon color="green darken-2">mdi-arrow-left</v-icon>
           </v-btn>
@@ -60,21 +64,38 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
-// import AppHeader from "@/components/AppHeader.vue";
-// import DataTable from "@/components/dataTable/DataTable.vue";
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
-const recetas = [
+// Estado de cambios sin guardar
+const hayCambios = ref(false)
+
+const guardarCambios = async () => {
+  // Simula un guardado (lógica real aquí)
+  console.log('Guardando cambios...')
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+  hayCambios.value = false
+  Swal.fire({
+    icon: 'success',
+    title: 'Cambios guardados',
+    timer: 1500,
+    showConfirmButton: false
+  })
+}
+
+// Datos de recetas
+const recetas = reactive([
   {
     nombre: "Nombre receta",
     categoria: "Categoría",
     costoProd: "$0.00",
     costoPub: "$0.00",
-    ingredientes: "receta-1", // este valor se pasará al evento
+    ingredientes: "receta-1",
   },
-  // … más filas …
-];
+])
 
+// Configuración de la tabla
 const configRecetas = reactive({
   rawText: "Recetas",
   mainColor: "light-green darken-1",
@@ -99,25 +120,51 @@ const configRecetas = reactive({
   ],
 
   orderByCol: { Field: ["nombre"] },
-
   selectConfig: { idRowData: "ingredientes" },
   selectableRow: false,
   disablePagination: false,
+  buttons: [],
+})
 
-  buttons: [], // no hay botones sticky en esta vista
-});
+// Router para navegación
+const router = useRouter()
 
 function onTableButton(action, payload) {
   switch (action) {
     case "verIngredientes":
-      console.log("Mostrar ingredientes de", payload);
-      break;
+      console.log("Mostrar ingredientes de", payload)
+      break
     case "addReceta":
       console.log("Agregar nueva receta");
+      router.push('/anadir-receta'); // ✅ Redirige a la página correcta
       break;
+
     case "editReceta":
-      console.log("Editar/Eliminar receta");
-      break;
+      console.log("Editar/Eliminar receta")
+      hayCambios.value = true
+      break
+  }
+}
+
+function irAInicio() {
+  if (hayCambios.value) {
+    Swal.fire({
+      title: 'Salir sin guardar cambios?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#4CAF50', // Verde
+      cancelButtonColor: '#d33',     // Rojo
+      confirmButtonText: 'Guardar cambios',
+      cancelButtonText: 'Salir sin guardar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        guardarCambios().then(() => router.push('/inicio'))
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        router.push('/inicio')
+      }
+    })
+  } else {
+    router.push('/inicio')
   }
 }
 </script>
