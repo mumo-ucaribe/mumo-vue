@@ -5,12 +5,12 @@
     </div>
     <div v-else class="d-flex justify-space-between align-center w-100">
       <!-- título -->
-      <span class="text-h5 font-weight-bold cursor-pointer" @click="irAInicio">MUMO</span>
+     <span class="text-h5 font-weight-bold cursor-pointer" @click="irAInicio">MUMO</span>
       <!-- botones -->
       <div class="d-flex">
         <v-btn
           v-for="item in navItems"
-          :key="item.to"
+          :key="item"
           depressed
           rounded
           class="mx-2"
@@ -26,49 +26,51 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import Swal from 'sweetalert2'
+import { useRouter } from "vue-router";
 
-const router = useRouter()
+const router = useRouter();
 
-const props = defineProps({
-  page: String,
-  tieneCambios: Boolean,
-  guardarCambios: Function
-})
+// Simulación de cambios sin guardar (debes reemplazar esto por una comprobación real desde un store o prop)
+let cambiosSinGuardar = true; // Puedes pasar esto como prop si quieres más control
 
-const isLogin = computed(() => props.page === 'login')
-
-const navItems = [
-  { nombre: 'ventas', to: '/ventas' },
-  { nombre: 'inventario', to: '/inventario' },
-  { nombre: 'reportes', to: '/reportes' },
-  { nombre: 'recetas', to: '/recetas' }
-]
-
-async function irAInicio() {
-  if (props.tieneCambios) {
-    const result = await Swal.fire({
-      title: '¿Salir sin guardar cambios?',
-      icon: 'warning',
-      showCancelButton: true,
-      showDenyButton: true,
-      confirmButtonText: 'Salir sin guardar',
-      confirmButtonColor: '#e74c3c',
-      denyButtonText: 'Guardar cambios',
-      denyButtonColor: '#27ae60',
-      cancelButtonText: 'Cancelar'
-    })
-
-    if (result.isConfirmed) {
-      router.push('/inicio')
-    } else if (result.isDenied) {
-      await props.guardarCambios()
-      router.push('/inicio')
+function irAInicio() {
+  if (cambiosSinGuardar) {
+    if (confirm("¿Salir sin guardar cambios?")) {
+      router.push("/inicio");
     }
   } else {
-    router.push('/inicio')
+    router.push("/inicio");
   }
 }
+
+import { computed } from "vue";
+
+const props = defineProps({
+  page: {
+    type: String,
+    required: true,
+  },
+});
+
+
+const isLogin = computed(() => props.page === "login");
+
+const navItems = [
+  {
+    nombre: "ventas",
+    to: "/ventas",
+  },
+  {
+    nombre: "inventario",
+    to: "/inventario",
+  },
+  {
+    nombre: "reportes",
+    to: "/reportes",
+  },
+  {
+    nombre: "recetas",
+    to: "/recetas",
+  },
+];
 </script>
