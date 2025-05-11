@@ -1,16 +1,18 @@
 <template>
   <div>
-    <!-- Botones -->
+    <!-- Botones superiores -->
     <div class="buttons sticky-buttons">
       <v-btn
         v-for="btn in config.buttons"
         :key="btn.buttonId"
         class="ma-1"
-        outlined
-        :color="buttonColor"
+        :icon="btn.iconOnly"
+        :color="btn.color || buttonColor"
+        :variant="btn.iconOnly ? 'elevated' : 'outlined'"
         @click="handleClick(btn)"
       >
-        <i :class="btn.icon" /> {{ btn.text }}
+        <v-icon v-if="btn.icon">{{ btn.icon }}</v-icon>
+        <template v-if="!btn.iconOnly">{{ btn.text }}</template>
       </v-btn>
     </div>
 
@@ -42,7 +44,7 @@
       no-data-text="Datos no encontrados"
       @click:row="rowClick"
     >
-      <!-- Header con filtros -->
+      <!-- Encabezado con filtros -->
       <template v-for="col in headers" #[`header.${col.value}`]>
         <ColumnHeaderWithFilter
           v-if="col.canBeFiltered"
@@ -55,7 +57,7 @@
         <template v-else>{{ col.text }}</template>
       </template>
 
-      <!-- Celdas con botones o formato -->
+      <!-- Celdas con botones o formatos -->
       <template
         v-for="f in formatFields"
         :key="f.value"
@@ -66,13 +68,14 @@
           <v-btn
             v-for="b in f.buttons"
             :key="b.buttonId"
-            small
-            outlined
+            :icon="b.iconOnly"
             :color="b.color"
+            :variant="b.iconOnly ? 'elevated' : 'outlined'"
             v-show="b.showBy ? item[b.showBy] : true"
             @click="handleClick(b, item)"
           >
-            {{ b.text }}
+            <v-icon v-if="b.icon">{{ b.icon }}</v-icon>
+            <template v-if="!b.iconOnly">{{ b.text }}</template>
           </v-btn>
         </div>
       </template>
@@ -97,7 +100,6 @@ const selectedRow = ref([]);
 const multiSearch = ref({});
 
 const buttonColor = props.config.mainColor || "light-green darken-1";
-
 const headers = props.config.fields;
 
 const formatFields = computed(() =>
@@ -120,7 +122,7 @@ const filteredData = computed(() => {
     );
 });
 
-// Botón genérico
+// Manejador general de clics en botones
 async function handleClick(btn, item = null) {
   const require = btn.require || false;
   const limit = btn.limitRequire || 0;

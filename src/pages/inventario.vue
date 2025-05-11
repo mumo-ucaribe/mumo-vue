@@ -1,11 +1,8 @@
 <template>
   <v-app>
-    <!-- HEADER -->
     <AppHeader page="inventario" />
-
     <v-main>
       <v-container fluid class="pa-4">
-        <!-- Tiempo conectado -->
         <div class="mb-4">
           <span class="font-weight-bold">Tiempo conectado:</span> 00:00
         </div>
@@ -13,18 +10,11 @@
         <v-row dense>
           <!-- FORMULARIO MERMA -->
           <v-col cols="12" md="6">
-            <v-sheet
-              elevation="1"
-              color="light-green lighten-5"
-              class="rounded-lg pa-4 mb-6"
-            >
+            <v-sheet elevation="1" color="light-green lighten-5" class="rounded-lg pa-4 mb-6">
               <!-- Insumo -->
               <v-row align="center" class="mb-4">
                 <v-col cols="4">
-                  <v-sheet
-                    color="light-green lighten-3"
-                    class="pa-3 text-center font-weight-bold"
-                  >
+                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
                     Insumo
                   </v-sheet>
                 </v-col>
@@ -44,10 +34,7 @@
               <!-- Cantidad + Unidad -->
               <v-row align="center" class="mb-4">
                 <v-col cols="4">
-                  <v-sheet
-                    color="light-green lighten-3"
-                    class="pa-3 text-center font-weight-bold"
-                  >
+                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
                     Cantidad
                   </v-sheet>
                 </v-col>
@@ -63,10 +50,7 @@
                   />
                 </v-col>
                 <v-col cols="4">
-                  <v-sheet
-                    color="light-green lighten-3"
-                    class="pa-3 text-center font-weight-bold"
-                  >
+                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
                     Unidad de medida
                   </v-sheet>
                 </v-col>
@@ -86,10 +70,7 @@
               <!-- Costo por unidad -->
               <v-row align="center" class="mb-4">
                 <v-col cols="4">
-                  <v-sheet
-                    color="light-green lighten-3"
-                    class="pa-3 text-center font-weight-bold"
-                  >
+                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
                     Costo por unidad
                   </v-sheet>
                 </v-col>
@@ -97,6 +78,7 @@
                   <v-text-field
                     v-model="form.costo"
                     prefix="$"
+                    type="number"
                     filled
                     rounded
                     color="light-green lighten-5"
@@ -109,22 +91,19 @@
               <!-- Fecha -->
               <v-row align="center" class="mb-4">
                 <v-col cols="4">
-                  <v-sheet
-                    color="light-green lighten-3"
-                    class="pa-3 text-center font-weight-bold"
-                  >
+                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
                     Fecha
                   </v-sheet>
                 </v-col>
                 <v-col cols="8">
                   <v-text-field
                     v-model="form.fecha"
+                    type="date"
                     filled
                     rounded
                     color="light-green lighten-5"
                     dense
                     hide-details
-                    placeholder="00-00-00"
                   />
                 </v-col>
               </v-row>
@@ -147,15 +126,9 @@
 
           <!-- VISUALIZACIÓN DE MERMA -->
           <v-col cols="12" md="6">
-            <v-sheet
-              elevation="1"
-              color="light-green lighten-5"
-              class="rounded-lg"
-            >
+            <v-sheet elevation="1" color="light-green lighten-5" class="rounded-lg">
               <v-sheet color="light-green lighten-3" class="pa-2 rounded-t-lg">
-                <span class="subtitle-1 font-weight-bold"
-                  >Visualización de merma</span
-                >
+                <span class="subtitle-1 font-weight-bold">Visualización de merma</span>
               </v-sheet>
 
               <v-data-table
@@ -165,7 +138,13 @@
                 dense
                 class="rounded-b-lg"
                 style="max-height: 400px; overflow-y: auto"
-              />
+              >
+                <template #item.acciones="{ item, index }">
+                  <v-btn icon color="red" @click="eliminarMerma(index)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </template>
+              </v-data-table>
             </v-sheet>
           </v-col>
         </v-row>
@@ -209,54 +188,73 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref } from 'vue'
+import Swal from 'sweetalert2'
 
 const form = reactive({
-  insumo: "",
+  insumo: '',
   cantidad: 1,
-  unidad: "kg",
+  unidad: 'kg',
   costo: 0.0,
-  fecha: "",
-});
+  fecha: ''
+})
 
-const unidades = ["kg", "g", "l"];
+const unidades = ['kg', 'g', 'l']
 
 const mermaHeaders = [
-  { text: "Insumo", value: "insumo" },
-  { text: "Cantidad", value: "cantidad" },
-  { text: "Costo por unidad", value: "costo" },
-  { text: "Fecha", value: "fecha" },
-];
+  { text: 'Insumo', value: 'insumo' },
+  { text: 'Cantidad', value: 'cantidad' },
+  { text: 'Costo por unidad', value: 'costo' },
+  { text: 'Fecha', value: 'fecha' },
+  { text: 'Acciones', value: 'acciones', sortable: false }
+]
 
-const mermas = ref([
-  { insumo: "Nombre insumo", cantidad: 1, costo: "$0.00", fecha: "00-00-00" },
-  { insumo: "Nombre insumo", cantidad: 1, costo: "$0.00", fecha: "00-00-00" },
-  // … más filas …
-]);
+const mermas = ref([])
 
 function agregarMerma() {
+  if (
+    !form.insumo.trim() ||
+    form.cantidad <= 0 ||
+    !form.unidad ||
+    form.costo === null ||
+    form.costo < 0 ||
+    !form.fecha
+  ) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Campos incompletos o inválidos',
+      text: 'Por favor llena correctamente todos los campos.',
+      confirmButtonColor: '#d33'
+    })
+    return
+  }
+
   mermas.value.push({
     insumo: form.insumo,
     cantidad: form.cantidad,
     costo: `$${parseFloat(form.costo).toFixed(2)}`,
-    fecha: form.fecha,
-  });
-  form.insumo = "";
-  form.cantidad = 1;
-  form.unidad = "kg";
-  form.costo = 0;
-  form.fecha = "";
+    fecha: form.fecha
+  })
+
+  form.insumo = ''
+  form.cantidad = 1
+  form.unidad = 'kg'
+  form.costo = 0
+  form.fecha = ''
+}
+
+function eliminarMerma(index) {
+  mermas.value.splice(index, 1)
 }
 
 function guardarCambios() {
-  // lógica para guardar
-  console.log("Guardando mermas…", mermas.value);
+  console.log('Guardando mermas…', mermas.value)
 }
 
 function cancelar() {
-  // lógica para cancelar
-  console.log("Operación cancelada");
+  console.log('Operación cancelada')
 }
 </script>
+
 
 <style scoped></style>
