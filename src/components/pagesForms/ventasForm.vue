@@ -105,7 +105,10 @@
     </v-container>
   </template>
   
+  
   <script setup>
+  import { useFormStore } from '@/stores/useFormStore'
+
   import { ref, reactive, watch } from 'vue'
   
   const props = defineProps({
@@ -156,5 +159,7 @@
   const eliminarFila = (index) => {
     platillos.value.splice(index, 1)
   }
+
+  
   </script>
   
