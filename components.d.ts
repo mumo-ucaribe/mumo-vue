@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnadirVentaForm: typeof import('./src/components/pagesForms/AnadirVentaForm.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     ColumnHeaderWithFilter: typeof import('./src/components/dataTable/ColumnHeaderWithFilter.vue')['default']

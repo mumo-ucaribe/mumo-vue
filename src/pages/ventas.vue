@@ -1,9 +1,7 @@
 <template>
-  <!-- Header a todo ancho -->
   <AppHeader page="ventas" />
 
   <v-container fluid class="pa-4">
-    <!-- DataTable reutilizable -->
     <DataTable
       :data="ventas"
       :config="configVentas"
@@ -12,103 +10,78 @@
     />
   </v-container>
 
-  <!-- BOTONES DE ACCIÓN -->
   <v-row class="mt-6 ml-5">
     <v-btn icon rounded="lg" elevation="2" class="ma-2" color="light-green lighten-3" to="/inicio">
       <v-icon color="green darken-2">mdi-home</v-icon>
     </v-btn>
   </v-row>
 
-  <!-- MODAL PARA FORMULARIO -->
   <Modal
     v-model="ventasModal"
-    title="Editar ventas"
-    :isEdit="isEdit"
+    :title="isEdit ? 'Editar venta' : 'Añadir venta'"
     :fullscreen="true"
-    :showFooter="true"
+    :showFooter="false"
   >
-    <VentasForm />
+    <VentasForm :venta="isEdit" @close="ventasModal = false" @guardar="guardarVenta" />
   </Modal>
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive } from 'vue'
+import AppHeader from '@/components/AppHeader.vue'
+import Modal from '@/components/Modal.vue'
+import VentasForm from '@/components/pagesForms/VentasForm.vue'
+import DataTable from '@/components/dataTable/DataTable.vue'
 
-const ventasModal = ref(false);
-const isEdit = ref(null);
+const ventasModal = ref(false)
+const isEdit = ref(null)
 
 const ventas = ref([
-  {
-    cliente: "Nombre Apellido",
-    contacto: "nombre@gmail.com",
-    pedido: "Nombre pedido",
-    id: "12345",
-    fecha: "00-00-00",
-    estado: "Estado",
-    precio: "$00000",
-  },
-  {
-    cliente: "Nombre Apellido",
-    contacto: "nombre@gmail.com",
-    pedido: "Nombre pedido",
-    id: "12346",
-    fecha: "00-00-01",
-    estado: "Estado",
-    precio: "$01000",
-  },
-]);
+  { cliente: 'Juan Pérez', contacto: 'juan@mail.com', pedido: 'Tarta', fecha: '2024-05-10', id: 1 },
+  { cliente: 'Ana López', contacto: 'ana@mail.com', pedido: 'Pan', fecha: '2024-05-09', id: 2 },
+])
 
 const configVentas = reactive({
-  rawText: "Ventas",
-  mainColor: "light-green darken-1",
-
+  rawText: 'Ventas',
+  mainColor: 'light-green darken-1',
   fields: [
-    { text: "Cliente", value: "cliente", canBeFiltered: true },
-    { text: "Contacto", value: "contacto", canBeFiltered: true },
-    { text: "Pedido", value: "pedido" },
-    { text: "ID", value: "id" },
-    { text: "Fecha", value: "fecha" },
-    { text: "Estado", value: "estado" },
-    { text: "Precio", value: "precio" },
+    { text: 'Cliente', value: 'cliente' },
+    { text: 'Contacto', value: 'contacto' },
+    { text: 'Pedido', value: 'pedido' },
+    { text: 'Fecha', value: 'fecha' },
+    { text: 'ID', value: 'id' },
   ],
-
-  orderByCol: { Field: ["fecha"] },
-  selectConfig: { idRowData: "id" },
+  orderByCol: { Field: ['fecha'] },
+  selectConfig: { idRowData: 'id' },
   selectableRow: false,
   disablePagination: false,
-
   buttons: [
-    {
-      buttonId: "newSale",
-      text: "Nueva venta",
-      icon: "mdi-plus",
-      require: false,
-    },
-    {
-      buttonId: "editSale",
-      text: "Editar o Eliminar venta",
-      icon: "mdi-pencil",
-      require: true,
-      limitRequire: 1,
-    },
+    { buttonId: 'newSale', text: 'Nueva venta', icon: 'mdi-plus', require: false },
+    { buttonId: 'editSale', text: 'Editar o Eliminar venta', icon: 'mdi-pencil', require: true, limitRequire: 1 },
   ],
-});
+})
 
 function onTableButton(buttonId, payload) {
-  if (buttonId === "newSale") {
-    isEdit.value = null;
-    ventasModal.value = true;
-    console.log("Crear venta");
+  if (buttonId === 'newSale') {
+    isEdit.value = null
+    ventasModal.value = true
   }
-  if (buttonId === "editSale") {
-    const selected = ventas.value.find((vnt) => vnt.id === payload);
+  if (buttonId === 'editSale') {
+    const selected = ventas.value.find((vnt) => vnt.id === payload)
     if (selected) {
-      isEdit.value = selected;
-      ventasModal.value = true;
-      console.log("Editar/Eliminar venta", payload);
-    } else {
-      console.warn("Venta no encontrada con ID:", payload);
+      isEdit.value = { ...selected }
+      ventasModal.value = true
     }
+  }
+}
+
+function guardarVenta(nuevaVenta) {
+  if (isEdit.value) {
+    const index = ventas.value.findIndex((v) => v.id === isEdit.value.id)
+    if (index !== -1) ventas.value[index] = nuevaVenta
+  } else {
+    nuevaVenta.id = Date.now()
+    ventas.value.push(nuevaVenta)
   }
 }
 </script>
