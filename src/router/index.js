@@ -7,6 +7,17 @@ const router = createRouter({
   routes: setupLayouts(routes),
 })
 
+// Guard global: todas las rutas requieren token excepto '/login'
+router.beforeEach((to) => {
+  const token = localStorage.getItem('authToken')
+  const isLoginRoute = to.path === '/'
+
+  if (!isLoginRoute && !token) {
+    // si no es login y no hay token, manda al login
+    return { path: '/' }
+  }
+})
+
 // Dynamic import fix
 router.onError((err, to) => {
   if (err?.message?.includes?.('Failed to fetch dynamically imported module')) {

@@ -77,7 +77,7 @@ const alert  = new Alert();
 const router = useRouter();
 
 const iniciarSesion = async () => {
-  // 1. Validación básica de campos
+  // Validación básica 
   if (!username.value.trim() || !password.value.trim()) {
     return alert.alert({
       title:    "Campos vacíos",
@@ -86,7 +86,7 @@ const iniciarSesion = async () => {
     });
   }
 
-  // 2. Confirmación y login con token
+  // Confirmación y login
   await alert.alertConfirm({
     action: "iniciar sesión",
     obj:    "en MUMO",
@@ -96,16 +96,16 @@ const iniciarSesion = async () => {
     },
     onConfirm: async creds => {
       try {
-        // a) Hacer POST a /login/ para obtener token
+        // Hacer POST a /login/ para obtener token
         const { data } = await axios.post("/login/", {
           username: creds.username,
           password: creds.password,
         });
-        // b) Guardar el token para futuras peticiones
+        // Guardar el token 
         setAuthToken(data.token);
         return { ok: true };
       } catch (err) {
-        // Credenciales inválidas suelen devolver 401 o 400
+        // Credenciales inválidas
         if (err.response?.status === 401 || err.response?.status === 400) {
           return { ok: false, error: "Usuario o contraseña incorrectos" };
         }
@@ -114,8 +114,7 @@ const iniciarSesion = async () => {
       }
     },
     onSuccess: () => {
-      // 3. Redirigir tras éxito
-      router.push({ name: "inicio" });
+      router.push({ path: "inicio" });
     },
   });
 };
@@ -130,3 +129,4 @@ const iniciarSesion = async () => {
   font-weight: bold;
 }
 </style>
+x|

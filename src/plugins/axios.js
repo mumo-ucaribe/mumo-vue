@@ -28,7 +28,7 @@ api.interceptors.response.use(
   res => res,
   err => {
     if (err.response?.status === 401) {
-      // token inválido o expirado → borrarlo y redirigir
+      // token inválido o expirado
       removeAuthToken()
       router.push({ name: 'Login' })
     }

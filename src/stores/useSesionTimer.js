@@ -1,43 +1,42 @@
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+// src/stores/useSesionTimer.js
+import { ref, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { removeAuthToken } from '@/plugins/axios'
 
-const tiempoMaximoInactividad = 30 * 60 * 1000; // 30 minutos en ms
+const TIEMPO_INACTIVIDAD = 30 * 60 * 1000  // 30 minutos
 
 export function useSesionTimer() {
-  const router = useRouter();
-  const tiempoUltimaActividad = ref(Date.now());
-  let timer = null;
+  const router = useRouter()
+  let timer = null
 
-  const iniciarSesionTimer = () => {
-    tiempoUltimaActividad.value = Date.now();
-    resetearTimer();
-
-    document.addEventListener('mousemove', resetearTimer);
-    document.addEventListener('keydown', resetearTimer);
-  };
-
-  const resetearTimer = () => {
-    tiempoUltimaActividad.value = Date.now();
-
-    clearTimeout(timer);
+  function resetearTimer() {
+    clearTimeout(timer)
     timer = setTimeout(() => {
-      alert('Sesión cerrada por inactividad.');
-      router.push('/'); // Redirige al inicio o login
-    }, tiempoMaximoInactividad);
-  };
+      removeAuthToken()
+      alert('Sesión cerrada por inactividad.')
+      router.push({ name: 'Login' })
+    }, TIEMPO_INACTIVIDAD)
+  }
 
-  const detenerTimer = () => {
-    clearTimeout(timer);
-    document.removeEventListener('mousemove', resetearTimer);
-    document.removeEventListener('keydown', resetearTimer);
-  };
+  function iniciarSesionTimer() {
+    resetearTimer()
+    document.addEventListener('mousemove', resetearTimer)
+    document.addEventListener('keydown',   resetearTimer)
+    document.addEventListener('click',     resetearTimer)
+  }
 
-  onUnmounted(() => {
-    detenerTimer();
-  });
+  function detenerTimer() {
+    clearTimeout(timer)
+    document.removeEventListener('mousemove', resetearTimer)
+    document.removeEventListener('keydown',   resetearTimer)
+    document.removeEventListener('click',     resetearTimer)
+  }
+
+  onUnmounted(detenerTimer)
 
   return {
     iniciarSesionTimer,
     resetearTimer,
-  };
+    detenerTimer
+  }
 }

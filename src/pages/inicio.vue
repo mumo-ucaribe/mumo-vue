@@ -7,7 +7,7 @@
       <v-container fluid class="pa-4">
         <!-- Tiempo conectado -->
         <div class="mb-4">
-          <span class="font-weight-bold">Tiempo conectado:</span> 00:00
+          <span class="font-weight-bold">Tiempo conectado:</span> {{ tiempoConectado }}
         </div>
 
         <v-row dense>
@@ -41,26 +41,17 @@
               />
             </v-sheet>
 
-            <!-- Formulario de nuevo insumo -->
-            <v-sheet elevation="1" color="light-green lighten-5" class="rounded-lg">
-              <v-sheet color="light-green lighten-3" class="pa-2 rounded-t-lg">
-                <span class="subtitle-1 font-weight-bold">Agregar insumo</span>
-              </v-sheet>
-              <v-sheet class="pa-4">
-                <InsumoForm />
-              </v-sheet>
-            </v-sheet>
           </v-col>
 
-          <!-- COLUMNA DERECHA: Predicciones -->
+          <!-- COLUMNA DERECHA: ResumenVenta -->
           <v-col cols="12" md="4">
             <v-sheet elevation="1" color="light-green lighten-5" class="rounded-lg">
               <v-sheet color="light-green lighten-3" class="pa-2 rounded-t-lg">
-                <span class="subtitle-1 font-weight-bold">Predicciones</span>
+                <span class="subtitle-1 font-weight-bold">ResumenVenta</span>
               </v-sheet>
               <v-list style="max-height: 420px; overflow-y: auto;">
                 <v-list-item
-                  v-for="(p, i) in predicciones"
+                  v-for="(p, i) in resumenVenta"
                   :key="i"
                 >
                   <v-list-item-content>
@@ -77,8 +68,8 @@
 </template>
 
 <script setup>
-import InsumoForm from '@/components/InsumoForm.vue'
-// import AppHeader from '@/components/AppHeader.vue'
+import { inject } from 'vue'
+const tiempoConectado = inject('tiempoConectado')
 
 const pedidosHeaders = [
   { text: 'Nombre pedido', value: 'nombre' },
@@ -105,7 +96,7 @@ const inventario = [
   { producto: 'Huevos', cantidad: 12 },
 ]
 
-const predicciones = [
+const resumenVenta = [
   'Platillos con alta probabilidad de pedido',
   'Platillos con alta probabilidad de pedido',
   'Platillos con alta probabilidad de pedido',
@@ -113,6 +104,3 @@ const predicciones = [
 ]
 </script>
 
-<style scoped>
-/* Personaliza bordes, radios o márgenes si quieres */
-</style>

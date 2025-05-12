@@ -5,26 +5,34 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useSesionTimer } from '@/stores/useSesionTimer'; // Asegúrate de tener el archivo stores/useSesionTimer.js
+import { ref, onMounted, onUnmounted, provide } from 'vue'
+import { differenceInSeconds }   from 'date-fns'
 
-const { iniciarSesionTimer, resetearTimer } = useSesionTimer();
-const route = useRoute();
+// crear el ref y proveer para toda la app
+const tiempoConectado = ref('00:00')
+provide('tiempoConectado', tiempoConectado)
+
+let startTime
+let intervalId
+
+// función que formatea segundos a MM:SS
+function formatMMSS(totalSeconds) {
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0')
+  const seconds = String(totalSeconds % 60).padStart(2, '0')
+  return `${minutes}:${seconds}`
+}
 
 onMounted(() => {
-  iniciarSesionTimer();
+  // guardamos el inicio
+  startTime = new Date()
+  // cada segundo calculamos segundos transcurridos
+  intervalId = setInterval(() => {
+    const secs = differenceInSeconds(new Date(), startTime)
+    tiempoConectado.value = formatMMSS(secs)
+  }, 1000)
+})
 
-  // También resetea el timer con interacción del usuario
-  window.addEventListener('click', resetearTimer);
-  window.addEventListener('keydown', resetearTimer);
-  window.addEventListener('mousemove', resetearTimer);
-});
-
-watch(
-  () => route.fullPath,
-  () => {
-    resetearTimer(); // Reinicia también al navegar entre páginas
-  }
-);
+onUnmounted(() => {
+  clearInterval(intervalId)
+})
 </script>
