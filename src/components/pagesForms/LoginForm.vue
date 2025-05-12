@@ -8,7 +8,11 @@
           </v-card-title>
 
           <v-card-text class="text-center">
-            <v-avatar size="80" class="mx-auto mb-4" color="light-green-lighten-3">
+            <v-avatar
+              size="80"
+              class="mx-auto mb-4"
+              color="light-green-lighten-3"
+            >
               <v-icon size="60" color="success">mdi-account</v-icon>
             </v-avatar>
 
@@ -32,19 +36,26 @@
                 variant="outlined"
               />
 
-              <v-btn type="submit" color="light-green darken-1" block class="mt-4 text-white">
+              <v-btn
+                type="submit"
+                color="light-green darken-1"
+                block
+                class="mt-4 text-white"
+              >
                 INICIAR SESIÓN
               </v-btn>
             </v-form>
 
-            <div class="text-center mt-4">
+            <!-- Se comenta debido a que como tal no tenemos pensado más cantidad de usuarios (testing) -->
+
+            <!-- <div class="text-center mt-4">
               <RouterLink to="/recuperar" class="d-block text-caption text-purple mb-1">
                 ¿Olvidó su contraseña?
               </RouterLink>
               <RouterLink to="/registro" class="text-caption text-purple">
                 Crear cuenta
               </RouterLink>
-            </div>
+            </div> -->
           </v-card-text>
         </v-card>
       </v-col>
@@ -53,38 +64,61 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Swal from 'sweetalert2'
+import { ref } from "vue";
+import axios, { setAuthToken } from "@/plugins/axios";
+import Alert from "@/plugins/alert";
+import { useRouter } from "vue-router";
 
-const username = ref('')
-const password = ref('')
-const showPassword = ref(false)
+const username     = ref("");
+const password     = ref("");
+const showPassword = ref(false);
 
-const iniciarSesion = () => {
+const alert  = new Alert();
+const router = useRouter();
+
+const iniciarSesion = async () => {
+  // 1. Validación básica de campos
   if (!username.value.trim() || !password.value.trim()) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Campos vacíos',
-      text: 'Debes completar ambos campos.',
-    })
-    return
+    return alert.alert({
+      title:    "Campos vacíos",
+      subtitle: "Debes completar ambos campos.",
+      icon:     "warning",
+    });
   }
 
-  if (username.value === 'admin' && password.value === 'admin123') {
-    Swal.fire({
-      icon: 'success',
-      title: '¡Inicio exitoso!',
-      text: 'Bienvenido a MUMO',
-      confirmButtonColor: '#8FBF3F',
-    })
-  } else {
-    Swal.fire({
-      icon: 'error',
-      title: 'Credenciales incorrectas',
-      text: 'Intenta de nuevo',
-    })
-  }
-}
+  // 2. Confirmación y login con token
+  await alert.alertConfirm({
+    action: "iniciar sesión",
+    obj:    "en MUMO",
+    data: {
+      username: username.value,
+      password: password.value,
+    },
+    onConfirm: async creds => {
+      try {
+        // a) Hacer POST a /login/ para obtener token
+        const { data } = await axios.post("/login/", {
+          username: creds.username,
+          password: creds.password,
+        });
+        // b) Guardar el token para futuras peticiones
+        setAuthToken(data.token);
+        return { ok: true };
+      } catch (err) {
+        // Credenciales inválidas suelen devolver 401 o 400
+        if (err.response?.status === 401 || err.response?.status === 400) {
+          return { ok: false, error: "Usuario o contraseña incorrectos" };
+        }
+        // Otros errores los propaga para mostrar validación
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      // 3. Redirigir tras éxito
+      router.push({ name: "inicio" });
+    },
+  });
+};
 </script>
 
 <style scoped>
