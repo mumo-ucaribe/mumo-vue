@@ -30,7 +30,7 @@
     <VentasForm
       :venta="isEdit"
       :recetas="recetas"
-      @save="handleSave"
+      @saved="handleSave"
       @close="ventasModal = false"
     />
   </Modal>
@@ -110,7 +110,7 @@ async function fetchData() {
       ...v,
       completada: v.completada ? "Sí" : "No",
       fecha_venta: new Date(v.fecha_venta).toLocaleDateString(),
-      // receta: v.receta
+      receta: v.recetas.map((r) => r.nombre).join(", "),
     }));
 
     // Recetas
@@ -172,20 +172,21 @@ async function onTableButton(buttonId, payload) {
 }
 
 function handleSave(nuevaOeditada) {
-  const { id, fecha_venta, total, completada } = nuevaOeditada;
-  const fila = {
-    ...nuevaOeditada,
-    fecha_venta: new Date(fecha_venta).toLocaleDateString(),
-    completada:  completada ? "Sí" : "No"
-  };
+  fetchData();
+  // const { id, fecha_venta, total, completada } = nuevaOeditada;
+  // const fila = {
+  //   ...nuevaOeditada,
+  //   fecha_venta: new Date(fecha_venta).toLocaleDateString(),
+  //   completada:  completada ? "Sí" : "No"
+  // };
 
-  if (isEdit.value) {
-    const idx = ventas.value.findIndex(v => v.id === id);
-    if (idx !== -1) ventas.value.splice(idx, 1, fila);
-  } else {
-    ventas.value.unshift(fila);
-  }
-  ventasModal.value = false;
+  // if (isEdit.value) {
+  //   const idx = ventas.value.findIndex(v => v.id === id);
+  //   if (idx !== -1) ventas.value.splice(idx, 1, fila);
+  // } else {
+  //   ventas.value.unshift(fila);
+  // }
+  // ventasModal.value = false;
 }
 
 onMounted(fetchData);

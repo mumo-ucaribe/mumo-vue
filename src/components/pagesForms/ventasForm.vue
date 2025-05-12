@@ -3,12 +3,7 @@
     <v-row dense>
       <!-- Columna izquierda: datos de la venta -->
       <v-col cols="12" md="6">
-        <v-text-field
-          v-model="form.id"
-          label="ID"
-          readonly
-          density="compact"
-        />
+        <v-text-field v-model="form.id" label="ID" readonly density="compact" />
         <v-text-field
           v-model="form.fecha"
           label="Fecha de venta"
@@ -25,10 +20,7 @@
           required
           density="compact"
         />
-        <v-switch
-          v-model="form.completada"
-          label="Completada"
-        />
+        <v-switch v-model="form.completada" label="Completada" />
       </v-col>
 
       <!-- Columna derecha: selección de recetas -->
@@ -53,114 +45,112 @@
     <v-card-actions class="justify-end">
       <v-btn text @click="$emit('close')">Cancelar</v-btn>
       <v-btn color="primary" type="submit">
-        {{ form.id ? 'Actualizar' : 'Guardar' }}
+        {{ form.id ? "Actualizar" : "Guardar" }}
       </v-btn>
     </v-card-actions>
   </v-form>
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue'
-import api from '@/plugins/axios.js'
-import Alert from '@/plugins/alert.js'
+import { reactive, ref, watch } from "vue";
+import api from "@/plugins/axios.js";
+import Alert from "@/plugins/alert.js";
 
 const props = defineProps({
-  venta:   { type: Object, default: null },
-  recetas: { type: Array,  default: () => [] }
-})
-const emit = defineEmits(['saved','close'])
+  venta: { type: Object, default: null },
+  recetas: { type: Array, default: () => [] },
+});
+const emit = defineEmits(["saved", "close"]);
 
-const alert = new Alert()
+const alert = new Alert();
 
 // Formulario reactivo
 const form = reactive({
-  id:          '',
-  fecha:       '',
-  total:       0,
-  completada:  false,
-  receta:      []   // array de IDs de recetas
-})
+  id: "",
+  fecha: "",
+  total: 0,
+  completada: false,
+  receta: [], // array de IDs de recetas
+});
 
 // Datos y selección de recetas
-const recipesList     = ref([])
-const selectedRecipes = ref([])
+const recipesList = ref([]);
+const selectedRecipes = ref([]);
 
 // Cabeceras de la tabla de recetas
-const recetaHeaders = [
-  { text: 'Receta', value: 'nombre' }
-]
+const recetaHeaders = [{ text: "Receta", value: "nombre" }];
 
-// 1) Sincronizar props.recetas → recipesList
+// Sincronizar props.recetas 
 watch(
   () => props.recetas,
-  v => { recipesList.value = v },
-  { immediate: true }
-)
+  (v) => {
+    recipesList.value = v;
+  },
+  { immediate: true },
+);
 
-// 2) Cargar datos de `ventas` en edición
+// Cargar datos de `ventas` en edición
 watch(
   () => props.venta,
-  v => {
+  (v) => {
     if (v) {
-      form.id          = v.id
-      form.fecha       = v.fecha_venta.slice(0,10)
-      form.total       = parseFloat(v.total)
-      form.completada  = !!v.completada
-      form.receta      = Array.isArray(v.receta) ? [...v.receta] : []
+      form.id = v.id;
+      form.fecha = v.fecha_venta.slice(0, 10);
+      form.total = parseFloat(v.total);
+      form.completada = v.completada.toLowerCase() === "sí" || v.completada.toLowerCase() === "si";
+      // Aquí obtienes correctamente los IDs desde `recetas`
+      form.receta = Array.isArray(v.recetas) ? v.recetas.map((receta) => receta.id) : [];
     } else {
-      form.id = form.fecha = ''
-      form.total = 0
-      form.completada = false
-      form.receta = []
+      form.id = form.fecha = "";
+      form.total = 0;
+      form.completada = false;
+      form.receta = [];
     }
   },
-  { immediate: true }
-)
+  { immediate: true },
+);
 
-// 3) Mantener selectedRecipes sincronizado con form.receta (IDs)
+// Mantener selectedRecipes sincronizado con form.receta (IDs)
 watch(
   [() => recipesList.value, () => form.receta],
   ([all, ids]) => {
-    selectedRecipes.value = all.filter(r => ids.includes(r.id))
+    selectedRecipes.value = all.filter((r) => ids.includes(r.id));
   },
-  { immediate: true }
-)
+  { immediate: true },
+);
 
-// 4) Al cambiar la selección, actualizamos form.receta
-watch(
-  selectedRecipes,
-  rows => {
-    form.receta = rows.map(r => r.id)
-  }
-)
+// Al cambiar la selección, actualizamos form.receta
+watch(selectedRecipes, (rows) => {
+  form.receta = rows.map((r) => r.id);
+});
 
-// 5) Submit con confirmación usando Alert
+// Submit con confirmación usando Alert
 async function onSubmit() {
   const payload = {
     fecha_venta: form.fecha,
-    total:       form.total.toFixed(2),
-    completada:  form.completada,
-    receta:      form.receta
-  }
+    total: form.total.toFixed(2),
+    completada: form.completada,
+    receta: form.receta,
+  };
 
   await alert.alertConfirm({
-    action: form.id ? 'actualizar' : 'guardar',
-    obj:    'venta',
-    data:   { id: form.id, payload },
+    action: form.id ? "actualizar" : "guardar",
+    obj: "venta",
+    data: { id: form.id, payload },
     onConfirm: async ({ id, payload }) => {
       if (id) {
-        const res = await api.put(`ventas/${id}`, payload)
-        return { ok: true, ...res.data && { data: res.data } }
+        const res = await api.put(`ventas/${id}`, payload);
+        return { ok: true, ...(res.data && { data: res.data }) };
       } else {
-        const res = await api.post('ventas', payload)
-        return { ok: true, ...res.data && { data: res.data } }
+        const res = await api.post("ventas", payload);
+        return { ok: true, ...(res.data && { data: res.data }) };
       }
     },
-    onSuccess: result => {
+    onSuccess: (result) => {
       // result.data es la respuesta del servidor
-      emit('saved', result.data)
-      emit('close')
-    }
-  })
+      emit("saved", result.data);
+      emit("close");
+    },
+  });
 }
 </script>
