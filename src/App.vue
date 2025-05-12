@@ -36,3 +36,9 @@ onUnmounted(() => {
   clearInterval(intervalId)
 })
 </script>
+
+<style>
+.swal2-container {
+  z-index: 3000 !important;
+}
+</style>

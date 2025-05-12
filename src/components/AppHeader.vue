@@ -63,10 +63,10 @@ const navItems = [
     nombre: "Inventario",
     to: "/inventario",
   },
-  {
-    nombre: "Reportes",
-    to: "/reportes",
-  },
+  // {
+  //   nombre: "Reportes",
+  //   to: "/reportes",
+  // },
   {
     nombre: "Recetas",
     to: "/recetas",

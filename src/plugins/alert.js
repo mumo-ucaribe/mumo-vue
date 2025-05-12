@@ -5,6 +5,9 @@ export default class Alert {
 
   async alertConfirm(config) {
     const result = await Swal.fire({
+      customClass: {
+        container: 'swal2-container--above-vuetify'
+      },
       title: `¿Deseas ${config.action} ${config.obj}?`,
       text: '',
       icon: 'question',

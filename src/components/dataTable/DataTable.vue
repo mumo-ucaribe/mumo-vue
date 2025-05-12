@@ -31,21 +31,24 @@
 
     <!-- Tabla -->
     <v-data-table
-      :headers="headers"
+      :headers="vHeaders"
       :items="filteredData"
       v-model="selectedRow"
-      v-model:sort-by="config.orderByCol.Field"
-      :items-per-page="pageRows || 15"
-      :hide-default-footer="config.disablePagination"
+      v-model:sort-by="sortBy"
       show-select
+      return-object
+      item-value="config.selectConfig.idRowData"
+      :hide-default-footer="config.disablePagination"
+      disable-pagination
+      :select-strategy="multipleSelect ? 'all' : 'single'"
       dense
       class="elevation-1"
       loading-text="Cargando información"
       no-data-text="Datos no encontrados"
-      @click:row="rowClick"
-    >
+      >
+      <!-- @click:row="onRowClick" -->
       <!-- Encabezado con filtros -->
-      <template v-for="col in headers" #[`header.${col.value}`]>
+      <template v-for="col in vHeaders" #[`header.${col.value}`]>
         <ColumnHeaderWithFilter
           v-if="col.canBeFiltered"
           :key="col.value"
@@ -60,8 +63,8 @@
       <!-- Celdas con botones o formatos -->
       <template
         v-for="f in formatFields"
-        :key="f.value"
-        #[`item.${f.value}`]="{ item }"
+        :key="f.key"
+        #[`item.${f.key}`]="{ item }"
       >
         <div v-if="!f.buttons" v-html="f.format(item)" />
         <div v-else>
@@ -72,7 +75,7 @@
             :color="b.color"
             :variant="b.iconOnly ? 'elevated' : 'outlined'"
             v-show="b.showBy ? item[b.showBy] : true"
-            @click="handleClick(b, item)"
+            @click.stop="handleClick(b, item)"
           >
             <v-icon v-if="b.icon">{{ b.icon }}</v-icon>
             <template v-if="!b.iconOnly">{{ b.text }}</template>
@@ -92,71 +95,114 @@ const props = defineProps({
   config: Object,
   pageRows: Number,
 });
-
 const emit = defineEmits(["buttonClick"]);
 
 const filter = ref("");
-const selectedRow = ref([]);
+const selectedRow = ref([]); // sigue siendo un array de objetos
 const multiSearch = ref({});
 
+const multipleSelect = props.config.multipleSelect ?? true;
 const buttonColor = props.config.mainColor || "light-green darken-1";
-const headers = props.config.fields;
 
-const formatFields = computed(() =>
-  headers.filter((f) => f.format || f.buttons),
+// Map config.fields → Vuetify headers
+const vHeaders = computed(() =>
+  props.config.fields.map((f) => ({
+    text: f.title,
+    value: f.key,
+    canBeFiltered: f.canBeFiltered,
+  })),
 );
 
-// Filtrado completo
-const filteredData = computed(() => {
-  return props.data
+// Orden
+const sortBy = ref(
+  Array.isArray(props.config.orderByCol?.Field)
+    ? props.config.orderByCol.Field
+    : [],
+);
+
+// Campos con formatos o botones
+const formatFields = computed(() =>
+  props.config.fields.filter((f) => f.format || f.buttons),
+);
+
+// Filtro global + columnas
+const filteredData = computed(() =>
+  props.data
     .filter((item) =>
       Object.entries(multiSearch.value).every(([key, vals]) => {
         if (!vals?.length) return true;
-        const raw = (item[key] || "").toString().toUpperCase();
+        const raw = String(item[key] || "").toUpperCase();
         const values = raw.split(",").map((v) => v.trim());
         return vals.some((v) => values.includes(v.toUpperCase()));
       }),
     )
     .filter((item) =>
       JSON.stringify(item).toLowerCase().includes(filter.value.toLowerCase()),
-    );
-});
+    ),
+);
 
-// Manejador general de clics en botones
+// === Función de manejo de botones (sin cambios) ===
 async function handleClick(btn, item = null) {
-  const require = btn.require || false;
-  const limit = btn.limitRequire || 0;
+  const idField = props.config.selectConfig.idRowData;
+  let payloadValue;
 
-  const payload = item
-    ? [item[props.config.selectConfig.idRowData]]
-    : selectedRow.value.map((r) => r[props.config.selectConfig.idRowData]);
-
-  if (require && payload.length === 0) {
-    return Swal.fire("Seleccione al menos un registro", "", "error");
+  if (item) {
+    payloadValue = item[idField];
+  } else if (multipleSelect) {
+    payloadValue = selectedRow.value.map((r) => r[idField]);
+  } else {
+    payloadValue = selectedRow.value[0]?.[idField];
   }
 
-  if (limit && payload.length > limit) {
-    return Swal.fire(`Máximo ${limit} registro(s)`, "", "error");
+  if (btn.require) {
+    const count = Array.isArray(payloadValue)
+      ? payloadValue.length
+      : payloadValue != null
+        ? 1
+        : 0;
+    if (count === 0) {
+      await Swal.fire("Seleccione al menos un registro", "", "error");
+      return;
+    }
   }
-
+  if (
+    btn.limitRequire &&
+    Array.isArray(payloadValue) &&
+    payloadValue.length > btn.limitRequire
+  ) {
+    await Swal.fire(`Máximo ${btn.limitRequire} registro(s)`, "", "error");
+    return;
+  }
   if (btn.confirm) {
     const result = await Swal.fire({
-      title: `¿Deseas ${btn.text.toLowerCase()} el/los registro(s)?`,
+      title: `¿Deseas ${btn.text.toLowerCase()}?`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Sí",
       cancelButtonText: "Cancelar",
     });
-
     if (!result.isConfirmed) return;
   }
 
-  emit("buttonClick", btn.buttonId, item ? payload[0] : payload);
+  emit("buttonClick", btn.buttonId, payloadValue);
   selectedRow.value = [];
 }
 
-function rowClick(item, row) {
-  row.select(true);
+// === Nueva función para toggle de selección al clickar la fila ===
+function onRowClick(_event, row) {
+  const idField = props.config.selectConfig.idRowData;
+  const idx = selectedRow.value.findIndex((r) => r[idField] === row[idField]);
+  if (idx > -1) {
+    // Si ya estaba seleccionada, la quitamos
+    selectedRow.value.splice(idx, 1);
+  } else {
+    // Si no, añadimos (single o multiple según config)
+    if (multipleSelect) {
+      selectedRow.value.push(row);
+    } else {
+      selectedRow.value = [row];
+    }
+  }
 }
 </script>
 

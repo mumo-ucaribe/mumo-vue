@@ -1,13 +1,37 @@
 <template>
-  <v-dialog :model-value="modelValue" @update:model-value="updateModelValue" fullscreen>
+  <v-dialog
+    :model-value="modelValue"
+    @update:model-value="updateModelValue"
+    :fullscreen="fullscreen"
+    :max-width="maxWidth"
+    :class="customClass"
+    :persistent="persistent"
+    :transition="fullscreen ? 'dialog-bottom-transition' : 'dialog-transition'"
+  >
     <v-card>
-      <v-card-title>{{ title }}</v-card-title>
-      <v-card-text>
+      <!-- Toolbar con botón de cerrar -->
+      <v-toolbar :color="toolbarColor" dark>
+        <v-btn icon @click="updateModelValue(false)">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title>{{ title }}</v-toolbar-title>
+        <v-spacer />
+      </v-toolbar>
+
+      <!-- Contenido -->
+      <v-card-text class="my-2 mx-6">
         <slot />
       </v-card-text>
 
-      <v-card-actions v-if="showFooter" class="justify-end">
-        <v-btn color="red" @click="updateModelValue(false)">Cerrar</v-btn>
+      <v-divider />
+
+      <!-- Footer con slot y botón de cerrar por defecto -->
+      <v-card-actions v-if="showFooter">
+        <slot name="footer">
+          <v-btn color="primary" @click="updateModelValue(false)">
+            Cerrar
+          </v-btn>
+        </slot>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -17,25 +41,41 @@
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    required: true,
+    required: true
   },
   title: {
     type: String,
-    default: '',
+    default: ''
   },
   fullscreen: {
     type: Boolean,
-    default: false,
+    default: false
+  },
+  maxWidth: {
+    type: [String, Number],
+    default: 800
+  },
+  customClass: {
+    type: String,
+    default: ''
   },
   showFooter: {
     type: Boolean,
-    default: true,
+    default: true
   },
+  toolbarColor: {
+    type: String,
+    default: '#BFDD8F'
+  },
+  persistent: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const emit = defineEmits(['update:modelValue'])
 
-function updateModelValue(value) {
-  emit('update:modelValue', value)
+function updateModelValue(val) {
+  emit('update:modelValue', val)
 }
 </script>
