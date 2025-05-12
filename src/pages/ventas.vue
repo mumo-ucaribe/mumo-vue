@@ -22,7 +22,7 @@
   <!-- MODAL PARA FORMULARIO -->
   <Modal
     v-model="ventasModal"
-    title="Editar ventas"
+    title="Añadir venta"
     :isEdit="isEdit"
     :fullscreen="true"
     :showFooter="true"

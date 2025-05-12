@@ -5,7 +5,7 @@
     </div>
     <div v-else class="d-flex justify-space-between align-center w-100">
       <!-- título -->
-      <span class="text-h5 font-weight-bold">MUMO</span>
+     <span class="text-h5 font-weight-bold cursor-pointer" @click="irAInicio">MUMO</span>
       <!-- botones -->
       <div class="d-flex">
         <v-btn
@@ -26,6 +26,23 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+// Simulación de cambios sin guardar (debes reemplazar esto por una comprobación real desde un store o prop)
+let cambiosSinGuardar = true; // Puedes pasar esto como prop si quieres más control
+
+function irAInicio() {
+  if (cambiosSinGuardar) {
+    if (confirm("¿Salir sin guardar cambios?")) {
+      router.push("/inicio");
+    }
+  } else {
+    router.push("/inicio");
+  }
+}
+
 import { computed } from "vue";
 
 const props = defineProps({
@@ -34,6 +51,7 @@ const props = defineProps({
     required: true,
   },
 });
+
 
 const isLogin = computed(() => props.page === "login");
 
