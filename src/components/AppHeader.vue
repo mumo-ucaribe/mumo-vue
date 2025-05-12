@@ -12,7 +12,6 @@
           v-for="item in navItems"
           :key="item"
           depressed
-          rounded
           class="mx-2"
           style="text-transform: none"
           color="light-green darken-1"
@@ -57,19 +56,19 @@ const isLogin = computed(() => props.page === "login");
 
 const navItems = [
   {
-    nombre: "ventas",
+    nombre: "Ventas",
     to: "/ventas",
   },
   {
-    nombre: "inventario",
+    nombre: "Inventario",
     to: "/inventario",
   },
   {
-    nombre: "reportes",
+    nombre: "Reportes",
     to: "/reportes",
   },
   {
-    nombre: "recetas",
+    nombre: "Recetas",
     to: "/recetas",
   },
 ];
