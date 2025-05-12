@@ -18,7 +18,16 @@
 
   <Modal
     v-model="ventasModal"
-    :title="isEdit ? 'Editar venta' : 'Añadir venta'"
+<Modal
+  v-model="ventasModal"
+  :title="isEdit ? 'Editar venta' : 'Añadir venta'"
+  :isEdit="isEdit"
+  :fullscreen="true"
+  :showFooter="false"
+>
+  <VentasForm :venta="isEdit" @close="ventasModal = false" />
+</Modal>
+
     :fullscreen="true"
     :showFooter="false"
   >
