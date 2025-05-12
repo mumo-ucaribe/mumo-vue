@@ -3,7 +3,7 @@
     <v-row dense>
       <!-- Columna izquierda: datos de la venta -->
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.id" label="ID" readonly density="compact" />
+        <v-text-field v-if="venta" v-model="form.id" label="ID" readonly density="compact" />
         <v-text-field
           v-model="form.fecha"
           label="Fecha de venta"
@@ -78,7 +78,7 @@ const recipesList = ref([]);
 const selectedRecipes = ref([]);
 
 // Cabeceras de la tabla de recetas
-const recetaHeaders = [{ text: "Receta", value: "nombre" }];
+const recetaHeaders = [{ title: "Receta", key: "nombre" }];
 
 // Sincronizar props.recetas 
 watch(

@@ -1,260 +1,308 @@
 <template>
-  <v-app>
-    <AppHeader page="inventario" />
-    <v-main>
-      <v-container fluid class="pa-4">
-        <div class="mb-4">
-          <span class="font-weight-bold">Tiempo conectado:</span> 00:00
-        </div>
+  <div>
+    <!-- Header -->
+    <AppHeader page="inventario"></AppHeader>
 
-        <v-row dense>
-          <!-- FORMULARIO MERMA -->
-          <v-col cols="12" md="6">
-            <v-sheet elevation="1" color="light-green lighten-5" class="rounded-lg pa-4 mb-6">
-              <!-- Insumo -->
-              <v-row align="center" class="mb-4">
-                <v-col cols="4">
-                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
-                    Insumo
-                  </v-sheet>
-                </v-col>
-                <v-col cols="8">
-                  <v-text-field
-                    v-model="form.insumo"
-                    filled
-                    rounded
-                    color="light-green lighten-5"
-                    dense
-                    hide-details
-                    placeholder="Nombre Insumo"
-                  />
-                </v-col>
-              </v-row>
+    <!-- Tarjeta principal -->
+    <v-card class="">
+      <!--  Definición de pestañas -->
+      <v-tabs v-model="tab" bg-color="light-green lighten-5" grow>
+        <v-tab value="inventario">Inventario</v-tab>
+        <v-tab value="merma">Merma</v-tab>
+      </v-tabs>
 
-              <!-- Cantidad + Unidad -->
-              <v-row align="center" class="mb-4">
-                <v-col cols="4">
-                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
-                    Cantidad
-                  </v-sheet>
-                </v-col>
-                <v-col cols="2">
-                  <v-text-field
-                    v-model.number="form.cantidad"
-                    type="number"
-                    filled
-                    rounded
-                    color="light-green lighten-5"
-                    dense
-                    hide-details
-                  />
-                </v-col>
-                <v-col cols="4">
-                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
-                    Unidad de medida
-                  </v-sheet>
-                </v-col>
-                <v-col cols="2">
-                  <v-select
-                    v-model="form.unidad"
-                    :items="unidades"
-                    filled
-                    rounded
-                    color="light-green lighten-5"
-                    dense
-                    hide-details
-                  />
-                </v-col>
-              </v-row>
-
-              <!-- Costo por unidad -->
-              <v-row align="center" class="mb-4">
-                <v-col cols="4">
-                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
-                    Costo por unidad
-                  </v-sheet>
-                </v-col>
-                <v-col cols="8">
-                  <v-text-field
-                    v-model="form.costo"
-                    prefix="$"
-                    type="number"
-                    filled
-                    rounded
-                    color="light-green lighten-5"
-                    dense
-                    hide-details
-                  />
-                </v-col>
-              </v-row>
-
-              <!-- Fecha -->
-              <v-row align="center" class="mb-4">
-                <v-col cols="4">
-                  <v-sheet color="light-green lighten-3" class="pa-3 text-center font-weight-bold">
-                    Fecha
-                  </v-sheet>
-                </v-col>
-                <v-col cols="8">
-                  <v-text-field
-                    v-model="form.fecha"
-                    type="date"
-                    filled
-                    rounded
-                    color="light-green lighten-5"
-                    dense
-                    hide-details
-                  />
-                </v-col>
-              </v-row>
-
-              <!-- Botón agregar -->
-              <div class="text-center">
-                <v-btn
-                  depressed
-                  rounded
-                  class="mt-4"
-                  style="background-color: #bfdd8f; text-decoration: underline"
-                  large
-                  @click="agregarMerma"
-                >
-                  Agregar merma
-                </v-btn>
-              </div>
-            </v-sheet>
-          </v-col>
-
-          <!-- VISUALIZACIÓN DE MERMA -->
-          <v-col cols="12" md="6">
-            <v-sheet elevation="1" color="light-green lighten-5" class="rounded-lg">
-              <v-sheet color="light-green lighten-3" class="pa-2 rounded-t-lg">
-                <span class="subtitle-1 font-weight-bold">Visualización de merma</span>
-              </v-sheet>
-
-              <v-data-table
-                :headers="mermaHeaders"
-                :items="mermas"
-                hide-default-footer
-                dense
-                class="rounded-b-lg"
-                style="max-height: 400px; overflow-y: auto"
-              >
-                <template #item.acciones="{ item, index }">
-                  <v-btn icon color="red" @click="eliminarMerma(index)">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </template>
-              </v-data-table>
-            </v-sheet>
-          </v-col>
-        </v-row>
-
-        <!-- BOTONES DE PÁGINA -->
-        <v-row class="mt-6" align="center" justify="space-between">
-          <v-btn icon color="light-green lighten-3" to="/inicio">
-            <v-icon color="green darken-2">mdi-home</v-icon>
-          </v-btn>
-
-          <div>
-            <v-btn
-              depressed
-              rounded
-              class="mx-2"
-              style="background-color: #bfdd8f; text-decoration: underline"
-              large
-              @click="guardarCambios"
-            >
-              Guardar cambios
-            </v-btn>
-            <v-btn
-              depressed
-              rounded
-              class="mx-2"
-              style="background-color: #bfdd8f; text-decoration: underline"
-              large
-              @click="cancelar"
-            >
-              Cancelar
-            </v-btn>
+      <!-- Contenido de cada pestaña -->
+      <v-tabs-window v-model="tab" class="mt-4 pa-4">
+        <!-- Inventario -->
+        <v-tabs-window-item value="inventario">
+          <!-- Tiempo conectado -->
+          <div class="mb-4">
+            <span class="font-weight-bold">Tiempo conectado:</span>
+            {{ tiempoConectado }}
           </div>
+          <DataTable
+            :data="insumos"
+            :config="insumosConfig"
+            :page-rows="10"
+            @buttonClick="onInventarioAction"
+          />
+        </v-tabs-window-item>
 
-          <v-btn icon color="light-green lighten-3" to="/ventas">
-            <v-icon color="green darken-2">mdi-arrow-left</v-icon>
-          </v-btn>
-        </v-row>
-      </v-container>
-    </v-main>
-  </v-app>
+        <!-- Merma -->
+        <v-tabs-window-item value="merma">
+          <!-- Tiempo conectado -->
+          <div class="mb-4">
+            <span class="font-weight-bold">Tiempo conectado:</span>
+            {{ tiempoConectado }}
+          </div>
+          <DataTable
+            :data="mermas"
+            :config="mermaConfig"
+            :page-rows="10"
+            @buttonClick="onMermaAction"
+          />
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </v-card>
+
+    <Modal v-model="dialogInsumo">
+      <InsumoForm
+        :insumo="nuevoInsumo"
+        :edit="editando"
+        @cancel="dialogInsumo = false"
+      />
+    </Modal>
+
+    <Modal v-model="dialogMerma">
+      <MermaForm
+        :merma="nuevoMerma"
+        :edit="editandoMerma"
+        @cancel="dialogMerma = false"
+      />
+    </Modal>
+  </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import Swal from 'sweetalert2'
+import { ref, onMounted, inject, reactive } from "vue";
+import api from "@/plugins/axios";
+import Alert from "@/plugins/alert";
 
-const form = reactive({
-  insumo: '',
-  cantidad: 1,
-  unidad: 'kg',
-  costo: 0.0,
-  fecha: ''
-})
+// inyección con fallback
+const tiempoConectado = inject("tiempoConectado", ref("00:00"));
 
-const unidades = ['kg', 'g', 'l']
+const tab = ref(null); // pestaña inicial
 
-const mermaHeaders = [
-  { text: 'Insumo', value: 'insumo' },
-  { text: 'Cantidad', value: 'cantidad' },
-  { text: 'Costo por unidad', value: 'costo' },
-  { text: 'Fecha', value: 'fecha' },
-  { text: 'Acciones', value: 'acciones', sortable: false }
-]
+const editando = ref(false);
+const alert = new Alert();
 
-const mermas = ref([])
+// --- Inventario ---
+const insumos = ref([]);
+const dialogInsumo = ref(false);
+const nuevoInsumo = reactive({
+  id: null,
+  nombre: "",
+  cantidad: 0,
+  unidad: "",
+  precio_unitario: 0,
+});
+const insumosConfig = {
+  fields: [
+    { key: "id", title: "ID", canBeFiltered: false },
+    { key: "nombre", title: "Nombre", canBeFiltered: true },
+    { key: "cantidad", title: "Cantidad", canBeFiltered: false },
+    { key: "unidad", title: "Unidad", canBeFiltered: true },
+    { key: "precio_unitario", title: "Precio Unitario", canBeFiltered: false },
+    { key: "fechaCreacion", title: "Fecha de Creacion", canBeFiltered: false },
+  ],
+  buttons: [
+    {
+      buttonId: "agregar",
+      text: "Agregar",
+      icon: "mdi-plus",
+      color: "green",
+      require: false,
+    },
+    {
+      buttonId: "editar",
+      text: "Editar",
+      icon: "mdi-pencil",
+      color: "blue",
+      require: true,
+    },
+    {
+      buttonId: "eliminar",
+      text: "Eliminar",
+      icon: "mdi-delete",
+      color: "red",
+      require: true,
+    },
+  ],
+  selectConfig: { idRowData: "id" },
+  mainColor: "blue",
+  multipleSelect: false,
+  disablePagination: false,
+};
 
-function agregarMerma() {
-  if (
-    !form.insumo.trim() ||
-    form.cantidad <= 0 ||
-    !form.unidad ||
-    form.costo === null ||
-    form.costo < 0 ||
-    !form.fecha
-  ) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Campos incompletos o inválidos',
-      text: 'Por favor llena correctamente todos los campos.',
-      confirmButtonColor: '#d33'
-    })
-    return
+async function onInventarioAction(buttonId, payload) {
+  const id = Array.isArray(payload) ? payload[0] : payload;
+
+  // NUEVA VENTA
+  if (buttonId === "agregar") {
+    editando.value = false;
+    Object.assign(nuevoInsumo, {
+      id: null,
+      nombre: "",
+      cantidad: 0,
+      unidad: "",
+      precio_unitario: 0,
+    });
+    dialogInsumo.value = true;
+    return;
   }
 
-  mermas.value.push({
-    insumo: form.insumo,
-    cantidad: form.cantidad,
-    costo: `$${parseFloat(form.costo).toFixed(2)}`,
-    fecha: form.fecha
-  })
+  // SI NO HAY ID válido, salimos
+  if (!id) return;
 
-  form.insumo = ''
-  form.cantidad = 1
-  form.unidad = 'kg'
-  form.costo = 0
-  form.fecha = ''
+  // BUSCAMOS EL OBJETO UNA VEZ
+  const sel = insumos.value.find((v) => v.id === id);
+  console.log("sel", sel);
+  if (!sel) return;
+
+  // EDITAR
+  if (buttonId === "editar") {
+    editando.value = true;
+    console.log;
+    Object.assign(nuevoInsumo, {
+      id: sel.id,
+      nombre: sel.nombre,
+      cantidad: +sel.cantidad,
+      unidad: sel.unidad,
+      precio_unitario: sel.precio_unitario,
+    });
+    dialogInsumo.value = true;
+    return;
+  }
+
+  // ELIMINAR
+  if (buttonId === "eliminar") {
+    await alert.alertConfirm({
+      action: "eliminar",
+      obj: `venta #${sel.id}`,
+      data: { id },
+      onConfirm: async ({ id }) => {
+        // petición DELETE al backend
+        await axios.delete(`insumos/${id}/`);
+        return { ok: true };
+      },
+      onSuccess: () => {
+        // quitamos localmente la venta eliminada
+        insumos.value = insumos.value.filter((v) => v.id !== id);
+      },
+    });
+  }
 }
 
-function eliminarMerma(index) {
-  mermas.value.splice(index, 1)
+// --- Merma ---
+const mermas = ref([]);
+const dialogMerma = ref(false);
+const editandoMerma = ref(false);
+const nuevoMerma = reactive({ id: null, cantidad: 0, insumo_id: null });
+const mermaConfig = reactive({
+  fields: [
+    { key: "id", title: "ID", canBeFiltered: false },
+    { key: "cantidad", title: "Cantidad", canBeFiltered: false },
+    { key: "insumo", title: "Insumo", canBeFiltered: false },
+    { key: "fecha_merma", title: "Fecha", canBeFiltered: false },
+  ],
+  buttons: [
+    {
+      buttonId: "agregar",
+      text: "Agregar",
+      icon: "mdi-plus",
+      color: "green",
+      require: false,
+    },
+    {
+      buttonId: "editar",
+      text: "Editar",
+      icon: "mdi-pencil",
+      color: "blue",
+      require: true,
+    },
+    {
+      buttonId: "eliminar",
+      text: "Eliminar",
+      icon: "mdi-delete",
+      color: "red",
+      require: true,
+    },
+  ],
+  selectConfig: { idRowData: "id" },
+  mainColor: "light-green",
+  multipleSelect: true,
+  disablePagination: false,
+});
+
+async function onMermaAction(buttonId, payload) {
+  // extraer id (payload puede venir como array si tienes multipleSelect)
+  const id = Array.isArray(payload) ? payload[0] : payload;
+
+  // 1. AGREGAR
+  if (buttonId === "agregar") {
+    editandoMerma.value = false;
+    Object.assign(nuevoMerma, { id: null, cantidad: 0, insumo_id: null });
+    dialogMerma.value = true;
+    return;
+  }
+
+  // 2. si no hay id válido, salimos
+  if (!id) return;
+
+  // 3. buscamos la merma seleccionada
+  const sel = mermas.value.find((m) => m.id === id);
+  if (!sel) return;
+
+  // 4. EDITAR
+  if (buttonId === "editar") {
+    editandoMerma.value = true;
+    Object.assign(nuevoMerma, {
+      id: sel.id,
+      cantidad: +sel.cantidad,
+      insumo: sel.insumo,
+    });
+    dialogMerma.value = true;
+    return;
+  }
+
+  // 5. ELIMINAR
+  if (buttonId === "eliminar") {
+    await alert.alertConfirm({
+      action: "eliminar",
+      obj: `merma #${sel.id}`,
+      data: { id },
+      onConfirm: async ({ id }) => {
+        // petición DELETE al backend
+        await api.delete(`mermas/${id}/`);
+        return { ok: true };
+      },
+      onSuccess: () => {
+        // actualizamos la lista local
+        mermas.value = mermas.value.filter((m) => m.id !== id);
+      },
+    });
+  }
 }
 
-function guardarCambios() {
-  console.log('Guardando mermas…', mermas.value)
-}
+// Carga los datos al montar el componente
+onMounted(async () => {
+  try {
+    const [resInsumos, resMermas] = await Promise.all([
+      api.get("insumos/"),
+      api.get("mermas/"),
+    ]);
+    insumos.value = resInsumos.data.results.map((i) => ({
+      id: i.id,
+      nombre: i.nombre,
+      cantidad: i.cantidad,
+      unidad: i.unidad,
+      precio_unitario: `$${parseFloat(i.precio_unitario).toFixed(2)}`,
+      fechaCreacion: new Date(i.fecha_creacion).toLocaleDateString(),
+    }));
 
-function cancelar() {
-  console.log('Operación cancelada')
-}
+    mermas.value = resMermas.data.results.map((m) => ({
+      id: m.id,
+      cantidad: m.cantidad,
+      insumo: m.insumo_nombre,
+      fecha_merma: new Date(m.fecha_merma).toLocaleDateString(),
+    }));
+    console.log("Datos cargados:", resMermas.data.results);
+  } catch (e) {
+    console.error(e);
+  }
+});
 </script>
 
-
-<style scoped></style>
+<style scoped>
+/* Si quieres mantener sticky headers o estilos adicionales */
+</style>

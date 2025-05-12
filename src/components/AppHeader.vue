@@ -34,9 +34,9 @@ let cambiosSinGuardar = true; // Puedes pasar esto como prop si quieres más con
 
 function irAInicio() {
   if (cambiosSinGuardar) {
-    if (confirm("¿Salir sin guardar cambios?")) {
-      router.push("/inicio");
-    }
+    router.push("/inicio");
+    // if (confirm("¿Salir sin guardar cambios?")) {
+    // }
   } else {
     router.push("/inicio");
   }

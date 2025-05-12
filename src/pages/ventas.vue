@@ -2,6 +2,12 @@
   <AppHeader page="ventas" />
 
   <v-container fluid class="pa-4">
+    <!-- Tiempo conectado -->
+    <div class="mb-4">
+      <span class="font-weight-bold">Tiempo conectado:</span>
+      {{ tiempoConectado }}
+    </div>
+
     <v-progress-circular v-if="loading" indeterminate class="my-8" />
     <div v-else-if="error" class="text-error">{{ error }}</div>
     <DataTable
@@ -37,9 +43,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
-import Swal from "sweetalert2";
+import { ref, reactive, computed, onMounted, inject } from "vue";
 import axios from "@/plugins/axios";
+
+// inyección con fallback
+const tiempoConectado = inject("tiempoConectado", ref("00:00"));
 
 const ventasModal = ref(false);
 const isEdit = ref(null);

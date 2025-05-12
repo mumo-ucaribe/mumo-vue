@@ -112,10 +112,7 @@ const fetchData = async () => {
       ...v,
       completada: v.completada ? "Sí" : "No",
       fecha_venta: new Date(v.fecha_venta).toLocaleDateString(),
-      // recetas: iRes.data
-      //   .filter((i) => v.insumos.includes(i.id))
-      //   .map((i) => i.nombre)
-      //   .join(", "),
+       receta: v.recetas.map((r) => r.nombre).join(", "),
     }));
 
     inventarioCount.value = iRes.data.count;
