@@ -91,10 +91,14 @@ import { ref, computed } from "vue";
 import Swal from "sweetalert2";
 
 const props = defineProps({
-  data: Array,
+  data: {
+    type: Array,
+    required: true,
+  },
   config: Object,
   pageRows: Number,
 });
+
 const emit = defineEmits(["buttonClick"]);
 
 const filter = ref("");
@@ -127,19 +131,19 @@ const formatFields = computed(() =>
 
 // Filtro global + columnas
 const filteredData = computed(() =>
-  props.data
-    .filter((item) =>
-      Object.entries(multiSearch.value).every(([key, vals]) => {
-        if (!vals?.length) return true;
-        const raw = String(item[key] || "").toUpperCase();
-        const values = raw.split(",").map((v) => v.trim());
-        return vals.some((v) => values.includes(v.toUpperCase()));
-      }),
-    )
-    .filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(filter.value.toLowerCase()),
-    ),
+  (Array.isArray(props.data) ? props.data : []).filter((item) =>
+    Object.entries(multiSearch.value).every(([key, vals]) => {
+      if (!vals?.length) return true;
+      const raw = String(item[key] || "").toUpperCase();
+      const values = raw.split(",").map((v) => v.trim());
+      return vals.some((v) => values.includes(v.toUpperCase()));
+    })
+  )
+  .filter((item) =>
+    JSON.stringify(item).toLowerCase().includes(filter.value.toLowerCase())
+  ),
 );
+
 
 // === Función de manejo de botones (sin cambios) ===
 async function handleClick(btn, item = null) {
@@ -209,7 +213,6 @@ function onRowClick(_event, row) {
 <style scoped>
 .sticky-buttons {
   position: sticky;
-  top: 70px;
   z-index: 5;
   background: white;
   padding: 8px 0;
